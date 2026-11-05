@@ -1,8 +1,9 @@
 import { SongItem } from '../types';
 import { parseSongSheet } from './csvParser';
+import { resolveAssetUrl } from './canvasRenderer';
 
 export const DEFAULT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1xfDC6nqXEO2hfWPV3zopZu4A-Vz40de3p9zNuks43i0/edit';
-const LOCAL_CSV_FALLBACK = '/assets/aistudio/song_l_t_1987c8ec';
+const LOCAL_CSV_FALLBACK = resolveAssetUrl('assets/aistudio/song_l_t_1987c8ec');
 const CACHE_KEY = 'rhythm_songs_cache_v1';
 const CACHE_TIME_KEY = 'rhythm_songs_cache_time_v1';
 

@@ -39,7 +39,7 @@ function rhythmApiPlugin(): Plugin {
 
             if (!csvText || csvText.length < 50) {
               // fallback to local file
-              const localPath = path.resolve(__dirname, 'public/assets/aistudio/song_l_t_1987c8ec');
+              const localPath = path.resolve(process.cwd(), 'public/assets/aistudio/song_l_t_1987c8ec');
               if (fs.existsSync(localPath)) {
                 csvText = fs.readFileSync(localPath, 'utf8');
                 source = 'local_file';
@@ -146,10 +146,11 @@ function rhythmApiPlugin(): Plugin {
 
 export default defineConfig(() => {
   return {
+    base: './', // relative base so assets load correctly on GitHub Pages subpaths (/repo-name/) and Cloudflare Pages
     plugins: [react(), tailwindcss(), rhythmApiPlugin()],
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, '.'),
+        '@': path.resolve(process.cwd(), '.'),
       },
     },
     server: {

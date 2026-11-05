@@ -1,6 +1,17 @@
 import { BannerConfig, SlotConfig } from '../types';
 
-export const DEFAULT_BACKGROUND_URL = '/assets/aistudio/WeeklyMission_1e414277.png';
+export const resolveAssetUrl = (path: string): string => {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:') || path.startsWith('blob:')) {
+    return path;
+  }
+  const base = import.meta.env.BASE_URL || './';
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  const cleanBase = base.endsWith('/') ? base : `${base}/`;
+  return `${cleanBase}${cleanPath}`;
+};
+
+export const DEFAULT_BACKGROUND_URL = resolveAssetUrl('assets/aistudio/WeeklyMission_1e414277.png');
 
 export const TEMPLATE_METRICS = {
   width: 1920,
@@ -30,7 +41,9 @@ export const TEMPLATE_METRICS = {
 
 const imageCache = new Map<string, HTMLImageElement>();
 
-export async function loadImage(src: string): Promise<HTMLImageElement> {
+export async function loadImage(rawSrc: string): Promise<HTMLImageElement> {
+  const src = resolveAssetUrl(rawSrc);
+
   if (imageCache.has(src)) {
     const cached = imageCache.get(src)!;
     if (cached.complete && cached.naturalWidth > 0) return cached;
@@ -46,7 +59,21 @@ export async function loadImage(src: string): Promise<HTMLImageElement> {
     };
 
     img.onerror = () => {
-      if (src.startsWith('http') && !src.includes('/api/proxy-image')) {
+      // If external image fails (e.g. strict CORS), try server proxy or static CDN fallback
+      if (src.startsWith('http')) {
+        const tryStaticCdnFallback = () => {
+          const cdnUrl = `https://images.weserv.nl/?url=${encodeURIComponent(src)}`;
+          const cdnImg = new Image();
+          cdnImg.crossOrigin = 'anonymous';
+          cdnImg.onload = () => {
+            imageCache.set(src, cdnImg);
+            resolve(cdnImg);
+          };
+          cdnImg.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+          cdnImg.src = cdnUrl;
+        };
+
+        // Try local dev proxy if available, else static CDN
         const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(src)}`;
         const fallbackImg = new Image();
         fallbackImg.crossOrigin = 'anonymous';
@@ -54,7 +81,9 @@ export async function loadImage(src: string): Promise<HTMLImageElement> {
           imageCache.set(src, fallbackImg);
           resolve(fallbackImg);
         };
-        fallbackImg.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+        fallbackImg.onerror = () => {
+          tryStaticCdnFallback();
+        };
         fallbackImg.src = proxyUrl;
       } else {
         reject(new Error(`Failed to load image: ${src}`));

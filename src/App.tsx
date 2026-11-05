@@ -7,11 +7,11 @@ import { SlotEditor } from './components/SlotEditor';
 import { PosterAndStyleEditor } from './components/PosterAndStyleEditor';
 import { SongCatalogModal } from './components/SongCatalogModal';
 import { SheetSettingsModal } from './components/SheetSettingsModal';
-import { renderBannerToCanvas, downloadCanvasImage } from './utils/canvasRenderer';
+import { renderBannerToCanvas, downloadCanvasImage, DEFAULT_BACKGROUND_URL, resolveAssetUrl } from './utils/canvasRenderer';
 import { Download } from 'lucide-react';
 
 const INITIAL_CONFIG: BannerConfig = {
-  backgroundUrl: '/assets/aistudio/WeeklyMission_1e414277.png',
+  backgroundUrl: DEFAULT_BACKGROUND_URL,
   category: 'Weekly Missions Category',
   starSlot: {
     coverImage: '',
@@ -79,7 +79,13 @@ export default function App() {
     try {
       const saved = localStorage.getItem('rhythm_banner_config_v1');
       if (saved) {
-        return { ...INITIAL_CONFIG, ...JSON.parse(saved) };
+        const parsed = JSON.parse(saved);
+        if (parsed.backgroundUrl && parsed.backgroundUrl.includes('WeeklyMission_1e414277.png')) {
+          parsed.backgroundUrl = DEFAULT_BACKGROUND_URL;
+        } else if (parsed.backgroundUrl) {
+          parsed.backgroundUrl = resolveAssetUrl(parsed.backgroundUrl);
+        }
+        return { ...INITIAL_CONFIG, ...parsed };
       }
     } catch {
       // fallback to initial
