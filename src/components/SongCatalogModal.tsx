@@ -60,7 +60,7 @@ export const SongCatalogModal: React.FC<SongCatalogModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="bg-[#141026] border border-purple-500/30 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+      <div className="bg-[#141026] border border-purple-500/30 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-modal-pop">
         {/* Modal Header */}
         <div className="p-4 sm:p-5 border-b border-purple-500/20 flex items-center justify-between bg-[#191432]">
           <div>

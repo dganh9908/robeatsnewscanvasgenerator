@@ -20,6 +20,7 @@ interface CanvasStudioProps {
   onSelectSlot: (slot: 'star' | 'pro' | 'poster') => void;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
+  onOpenNotice?: () => void;
 }
 
 export const CanvasStudio: React.FC<CanvasStudioProps> = ({
@@ -27,6 +28,7 @@ export const CanvasStudio: React.FC<CanvasStudioProps> = ({
   onSelectSlot,
   isCollapsed: controlledIsCollapsed,
   onToggleCollapse,
+  onOpenNotice,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
@@ -223,10 +225,15 @@ export const CanvasStudio: React.FC<CanvasStudioProps> = ({
     return (
       <div className="bg-[#110d24] rounded-2xl border border-purple-500/20 shadow-xl p-3 flex items-center justify-between transition-all duration-200">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-950/50 border border-emerald-500/40 text-xs text-emerald-300">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="font-semibold tracking-wide">Service: Online</span>
-          </div>
+          <button
+            type="button"
+            onClick={onOpenNotice}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-950/50 hover:bg-amber-900/60 border border-amber-500/40 text-xs text-amber-300 transition cursor-pointer"
+            title="Click to view Maintenance & Update notice"
+          >
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+            <span className="font-semibold tracking-wide">Service: Maintenance - Still working</span>
+          </button>
           <div className="flex items-center gap-2">
             <span className="text-xs font-righteous text-purple-200">Canvas Preview</span>
             <span className="text-[11px] text-purple-400 hidden sm:inline">(Collapsed)</span>
@@ -250,11 +257,16 @@ export const CanvasStudio: React.FC<CanvasStudioProps> = ({
       {/* Top Studio Control Bar */}
       <div className="p-2.5 sm:p-3 bg-[#171230] border-b border-purple-500/20 flex flex-wrap items-center justify-between gap-2.5">
         <div className="flex items-center flex-wrap gap-2">
-          {/* Service: Online Badge */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-950/50 border border-emerald-500/40 text-xs text-emerald-300">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="font-semibold tracking-wide">Service: Online</span>
-          </div>
+          {/* Service: Maintenance - Still working Badge */}
+          <button
+            type="button"
+            onClick={onOpenNotice}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-950/50 hover:bg-amber-900/60 border border-amber-500/40 text-xs text-amber-300 transition cursor-pointer"
+            title="Click to view Maintenance & Update notice"
+          >
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+            <span className="font-semibold tracking-wide">Service: Maintenance - Still working</span>
+          </button>
 
           {/* Preset Buttons (Fit, 50%, 75%, 100%) */}
           <div className="flex items-center gap-1 bg-[#100c22] p-1 rounded-lg border border-purple-500/30 text-xs">

@@ -7,6 +7,7 @@ import { SlotEditor } from './components/SlotEditor';
 import { PosterAndStyleEditor } from './components/PosterAndStyleEditor';
 import { SongCatalogModal } from './components/SongCatalogModal';
 import { SheetSettingsModal } from './components/SheetSettingsModal';
+import { UpdateNoticeModal } from './components/UpdateNoticeModal';
 import { renderBannerToCanvas, downloadCanvasImage, DEFAULT_BACKGROUND_URL, resolveAssetUrl } from './utils/canvasRenderer';
 import { Download } from 'lucide-react';
 
@@ -97,6 +98,7 @@ export default function App() {
   const [songs, setSongs] = useState<SongItem[]>([]);
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
   const [isSheetSettingsOpen, setIsSheetSettingsOpen] = useState(false);
+  const [isNoticeOpen, setIsNoticeOpen] = useState(true);
   const [targetCatalogSlot, setTargetCatalogSlot] = useState<'star' | 'pro'>('star');
 
   const [syncState, setSyncState] = useState<SheetSyncState>({
@@ -219,6 +221,7 @@ export default function App() {
             config={config}
             isCollapsed={isCanvasCollapsed}
             onToggleCollapse={() => setIsCanvasCollapsed((prev) => !prev)}
+            onOpenNotice={() => setIsNoticeOpen(true)}
             onSelectSlot={(slot) => {
               if (slot === 'star') setActiveTab('star');
               else if (slot === 'pro') setActiveTab('pro');
@@ -268,36 +271,42 @@ export default function App() {
           {/* Tab Content Body */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {activeTab === 'star' && (
-              <SlotEditor
-                slotType="star"
-                slot={config.starSlot}
-                onChange={handleUpdateStar}
-                onOpenCatalog={() => {
-                  setTargetCatalogSlot('star');
-                  setIsCatalogOpen(true);
-                }}
-                songs={songs}
-              />
+              <div key="star-tab" className="animate-fade-in-up">
+                <SlotEditor
+                  slotType="star"
+                  slot={config.starSlot}
+                  onChange={handleUpdateStar}
+                  onOpenCatalog={() => {
+                    setTargetCatalogSlot('star');
+                    setIsCatalogOpen(true);
+                  }}
+                  songs={songs}
+                />
+              </div>
             )}
 
             {activeTab === 'pro' && (
-              <SlotEditor
-                slotType="pro"
-                slot={config.proSlot}
-                onChange={handleUpdatePro}
-                onOpenCatalog={() => {
-                  setTargetCatalogSlot('pro');
-                  setIsCatalogOpen(true);
-                }}
-                songs={songs}
-              />
+              <div key="pro-tab" className="animate-fade-in-up">
+                <SlotEditor
+                  slotType="pro"
+                  slot={config.proSlot}
+                  onChange={handleUpdatePro}
+                  onOpenCatalog={() => {
+                    setTargetCatalogSlot('pro');
+                    setIsCatalogOpen(true);
+                  }}
+                  songs={songs}
+                />
+              </div>
             )}
 
             {activeTab === 'poster' && (
-              <PosterAndStyleEditor
-                config={config}
-                onChange={handleUpdateConfig}
-              />
+              <div key="poster-tab" className="animate-fade-in-up">
+                <PosterAndStyleEditor
+                  config={config}
+                  onChange={handleUpdateConfig}
+                />
+              </div>
             )}
           </div>
 
@@ -364,6 +373,12 @@ export default function App() {
         onUpdateSheetUrl={async (newUrl) => {
           await loadSongsData(newUrl);
         }}
+      />
+
+      {/* Website Maintenance & Update Notice Popup */}
+      <UpdateNoticeModal
+        isOpen={isNoticeOpen}
+        onClose={() => setIsNoticeOpen(false)}
       />
     </div>
   );

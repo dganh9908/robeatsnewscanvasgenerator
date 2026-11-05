@@ -36,7 +36,7 @@ export const SheetSettingsModal: React.FC<SheetSettingsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="bg-[#141026] border border-purple-500/30 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+      <div className="bg-[#141026] border border-purple-500/30 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-modal-pop">
         {/* Header */}
         <div className="p-4 border-b border-purple-500/20 flex items-center justify-between bg-[#191432]">
           <div className="flex items-center gap-2.5">
