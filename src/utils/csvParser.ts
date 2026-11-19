@@ -1,4 +1,5 @@
 import { SongItem } from '../types';
+import { normalizeElementKey } from './elementAssets';
 
 /**
  * Robust CSV parser that handles:
@@ -65,14 +66,23 @@ export function parseSongSheet(csvText: string): SongItem[] {
 
   const songs: SongItem[] = [];
 
-  // Determine starting row: row 0 or 1 might be headers
+  // Determine starting row and detect Element column index from header row
   let startIdx = 0;
+  let elementColIdx = 6;
   for (let i = 0; i < Math.min(rows.length, 5); i++) {
     const firstCell = (rows[i][0] || '').toLowerCase();
+    const detectedElIdx = rows[i].findIndex((c) => c.trim().toLowerCase() === 'element');
+    if (detectedElIdx !== -1) {
+      elementColIdx = detectedElIdx;
+    }
     if (firstCell.includes('song title') || firstCell.includes('title')) {
       startIdx = i + 1;
       // If the row after is subheaders (Easy, Normal, Hard)
       if (rows[startIdx] && rows[startIdx].some(c => /easy|normal|hard/i.test(c))) {
+        const subElIdx = rows[startIdx].findIndex((c) => c.trim().toLowerCase() === 'element');
+        if (subElIdx !== -1) {
+          elementColIdx = subElIdx;
+        }
         startIdx++;
       }
       break;
@@ -89,7 +99,8 @@ export function parseSongSheet(csvText: string): SongItem[] {
     const diffEasy = (r[3] || '-').trim();
     const diffNormal = (r[4] || '-').trim();
     const diffHard = (r[5] || '-').trim();
-    const element = (r[6] || '').trim();
+    const rawElement = (r[elementColIdx] || '').trim();
+    const element = normalizeElementKey(rawElement) || rawElement;
 
     songs.push({
       id: `song-${i}-${title.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,

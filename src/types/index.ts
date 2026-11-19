@@ -1,3 +1,5 @@
+export type DifficultyTier = 'Easy' | 'Normal' | 'Hard';
+
 export interface SongItem {
   id: string;
   title: string;
@@ -14,12 +16,17 @@ export interface SlotConfig {
   artist: string;
   songName: string;
   score: string;
-  scale: number; // default locked to 0.9
+  element?: string;
+  difficultyTier?: DifficultyTier;
+  difficultyLevel?: string;
+  sheetDiffEasy?: string;
+  sheetDiffNormal?: string;
+  sheetDiffHard?: string;
+  scale: number; // default 1.0
   offsetX: number;
   offsetY: number;
   fit: 'cover' | 'contain' | 'fill';
   selectedSongId?: string;
-  difficultyLevel?: string;
   artistOffsetX?: number;
   artistOffsetY?: number;
   songOffsetX?: number;
@@ -32,16 +39,46 @@ export interface SlotConfig {
   strokeWidth?: number;
 }
 
+export interface LeaderboardSlotConfig {
+  coverImage: string;
+  artist: string;
+  songName: string;
+  element: string;
+  difficultyTier: DifficultyTier;
+  difficultyLevel: string;
+  sheetDiffEasy?: string;
+  sheetDiffNormal?: string;
+  sheetDiffHard?: string;
+  scale: number;
+  offsetX: number;
+  offsetY: number;
+  fit: 'cover' | 'contain' | 'fill';
+  selectedSongId?: string;
+  artistOffsetX?: number;
+  artistOffsetY?: number;
+  songOffsetX?: number;
+  songOffsetY?: number;
+  difficultyOffsetX?: number;
+  difficultyOffsetY?: number;
+  artistFontSize?: number;
+  songFontSize?: number;
+  difficultyFontSize?: number;
+  artistTextColor?: string;
+  textColor?: string;
+  strokeWidth?: number;
+}
+
 export interface BannerConfig {
-  backgroundUrl: string; // Default: /assets/aistudio/WeeklyMission_1e414277.png
-  category: string; // "Weekly Missions Category"
+  backgroundUrl: string; // Default: /assets/aistudio/WeeklyMission__5__7e00c34b.png
+  category: string; // "Weekly Missions & Leaderboard"
   starSlot: SlotConfig;
   proSlot: SlotConfig;
+  leaderboardSlots: LeaderboardSlotConfig[]; // 8 Weekly Leaderboard songs
   poster: string; // e.g. "meelo"
   posterPrefix: string; // "POSTER: "
   posterOffsetX?: number;
   posterOffsetY?: number;
-  
+
   // Text styling overrides
   fontFamily: string; // "Righteous"
   textColor: string; // "#fed835"

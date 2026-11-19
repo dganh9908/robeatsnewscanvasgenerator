@@ -107,3 +107,34 @@ button:active {
 .animate-pulse-glow {
   animation: pulseGlow 2.5s infinite ease-in-out;
 }
+
+/* Zero-stretch 16:9 preview frame fitted cleanly inside desktop viewport */
+.preview-stage-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-stage-frame {
+  width: 100%;
+  height: 100%;
+}
+
+@media (min-width: 1024px) {
+  .preview-stage-container {
+    aspect-ratio: auto;
+    flex: 1 1 0%;
+    min-height: 0;
+    height: 100%;
+    container-type: size;
+  }
+
+  .preview-stage-frame {
+    width: min(100cqw, calc(100cqh * 16 / 9));
+    height: min(100cqh, calc(100cqw * 9 / 16));
+  }
+}
+

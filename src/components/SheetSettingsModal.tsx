@@ -44,7 +44,7 @@ export const SheetSettingsModal: React.FC<SheetSettingsModalProps> = ({
               <FileSpreadsheet className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-righteous text-white text-base">Google Sheets Integration</h3>
+              <h3 className="font-righteous text-white text-base">Song List Database (Google Sheet)</h3>
             </div>
           </div>
           <button
@@ -62,7 +62,7 @@ export const SheetSettingsModal: React.FC<SheetSettingsModalProps> = ({
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-purple-200 font-semibold flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5 text-yellow-300" />
-                <span>Google Sheet URL (Locked):</span>
+                <span>Google Sheet URL:</span>
               </label>
               <a
                 href={DEFAULT_SHEET_URL}

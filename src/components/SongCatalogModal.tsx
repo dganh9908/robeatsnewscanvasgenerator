@@ -1,15 +1,18 @@
 import React, { useState, useMemo } from 'react';
 import { SongItem } from '../types';
 import { Search, X, Music, RefreshCw, ExternalLink, Check } from 'lucide-react';
+import { getElementImageUrl, getElementFallbackUrl } from '../utils/elementAssets';
 
 interface SongCatalogModalProps {
   isOpen: boolean;
   onClose: () => void;
   songs: SongItem[];
-  onSelectSong: (song: SongItem, slot: 'star' | 'pro') => void;
+  onSelectSong: (song: SongItem, slot: 'star' | 'pro' | 'leaderboard', leaderboardIndex?: number) => void;
   onSync: () => Promise<void>;
   isSyncing: boolean;
   sheetUrl: string;
+  activeLeaderboardIndex?: number;
+  onChangeActiveLeaderboardIndex?: (index: number) => void;
 }
 
 export const SongCatalogModal: React.FC<SongCatalogModalProps> = ({
@@ -20,6 +23,8 @@ export const SongCatalogModal: React.FC<SongCatalogModalProps> = ({
   onSync,
   isSyncing,
   sheetUrl,
+  activeLeaderboardIndex = 0,
+  onChangeActiveLeaderboardIndex,
 }) => {
   const [search, setSearch] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
@@ -41,9 +46,10 @@ export const SongCatalogModal: React.FC<SongCatalogModalProps> = ({
     if (selectedDifficulty !== 'all') {
       const diffNum = parseInt(selectedDifficulty, 10);
       list = list.filter((s) => {
+        const easy = parseInt(s.difficultyEasy, 10);
         const hard = parseInt(s.difficultyHard, 10);
         const normal = parseInt(s.difficultyNormal, 10);
-        return hard === diffNum || normal === diffNum;
+        return easy === diffNum || hard === diffNum || normal === diffNum;
       });
     }
 
@@ -52,9 +58,18 @@ export const SongCatalogModal: React.FC<SongCatalogModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleSelect = (song: SongItem, slot: 'star' | 'pro') => {
-    onSelectSong(song, slot);
-    setAppliedNotification(`Applied "${song.title}" to ${slot === 'star' ? 'Star' : 'Pro'} Mission!`);
+  const handleSelect = (song: SongItem, slot: 'star' | 'pro' | 'leaderboard') => {
+    if (slot === 'leaderboard') {
+      const slotNum = activeLeaderboardIndex + 1;
+      onSelectSong(song, 'leaderboard', activeLeaderboardIndex);
+      setAppliedNotification(`Applied "${song.title}" to Weekly Leaderboard #${slotNum}!`);
+      if (onChangeActiveLeaderboardIndex && activeLeaderboardIndex < 7) {
+        onChangeActiveLeaderboardIndex(activeLeaderboardIndex + 1);
+      }
+    } else {
+      onSelectSong(song, slot);
+      setAppliedNotification(`Applied "${song.title}" to ${slot === 'star' ? 'Star' : 'Pro'} Mission!`);
+    }
     setTimeout(() => setAppliedNotification(null), 2500);
   };
 
@@ -116,12 +131,12 @@ export const SongCatalogModal: React.FC<SongCatalogModalProps> = ({
         )}
 
         {/* Filter & Search Bar */}
-        <div className="p-4 bg-[#181330] border-b border-purple-500/20 flex flex-wrap gap-3 items-center justify-between">
-          <div className="relative flex-1 min-w-[240px]">
+        <div className="p-3.5 bg-[#181330] border-b border-purple-500/20 flex flex-wrap gap-2.5 items-center justify-between">
+          <div className="relative flex-1 min-w-[200px]">
             <Search className="w-4 h-4 text-purple-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search title, artist, or element..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-[#100c22] border border-purple-500/30 rounded-xl pl-9 pr-8 py-2 text-sm text-white placeholder-purple-400/50 focus:outline-none focus:border-pink-500 transition"
@@ -136,7 +151,29 @@ export const SongCatalogModal: React.FC<SongCatalogModalProps> = ({
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Weekly Leaderboard Target Slot Picker */}
+            <div className="flex items-center gap-1 bg-[#100c22] border border-amber-400/30 rounded-xl px-2 py-1">
+              <span className="text-[11px] font-righteous text-amber-300 px-1 whitespace-nowrap">
+                LB Slot:
+              </span>
+              {[0, 1, 2, 3, 4, 5, 6, 7].map((idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => onChangeActiveLeaderboardIndex?.(idx)}
+                  className={`w-6 h-6 rounded-lg text-[11px] font-righteous transition cursor-pointer tabular-nums ${
+                    activeLeaderboardIndex === idx
+                      ? 'bg-amber-500 text-[#140f29]'
+                      : 'text-purple-300 hover:bg-white/10 hover:text-white'
+                  }`}
+                  title={`Target Weekly Leaderboard Slot #${idx + 1}`}
+                >
+                  {idx + 1}
+                </button>
+              ))}
+            </div>
+
             <select
               value={selectedDifficulty}
               onChange={(e) => setSelectedDifficulty(e.target.value)}
@@ -192,28 +229,50 @@ export const SongCatalogModal: React.FC<SongCatalogModalProps> = ({
                         </span>
                       )}
                       {song.element && (
-                        <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                          {song.element}
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                          {getElementImageUrl(song.element) && (
+                            <img
+                              src={getElementImageUrl(song.element)}
+                              alt={song.element}
+                              onError={(e) => {
+                                const fallback = getElementFallbackUrl(song.element);
+                                if (fallback && e.currentTarget.src !== fallback) {
+                                  e.currentTarget.src = fallback;
+                                }
+                              }}
+                              className="w-3.5 h-3.5 object-contain shrink-0"
+                            />
+                          )}
+                          <span>{song.element}</span>
                         </span>
                       )}
                     </div>
                   </div>
 
                   {/* Quick Select Buttons (without icons) */}
-                  <div className="flex flex-col sm:flex-row gap-1.5 shrink-0">
+                  <div className="flex flex-col gap-1 shrink-0">
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => handleSelect(song, 'star')}
+                        className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-righteous shadow-sm transition cursor-pointer"
+                        title="Set as Star slot"
+                      >
+                        Star
+                      </button>
+                      <button
+                        onClick={() => handleSelect(song, 'pro')}
+                        className="px-2.5 py-1 rounded-lg bg-pink-600 hover:bg-pink-500 text-white text-xs font-righteous shadow-sm transition cursor-pointer"
+                        title="Set as Pro slot"
+                      >
+                        Pro
+                      </button>
+                    </div>
                     <button
-                      onClick={() => handleSelect(song, 'star')}
-                      className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-righteous shadow-sm transition cursor-pointer"
-                      title="Set as Star slot"
+                      onClick={() => handleSelect(song, 'leaderboard')}
+                      className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-[#140f29] text-xs font-righteous shadow-sm transition cursor-pointer whitespace-nowrap"
+                      title={`Set as Weekly Leaderboard Slot #${activeLeaderboardIndex + 1}`}
                     >
-                      Star
-                    </button>
-                    <button
-                      onClick={() => handleSelect(song, 'pro')}
-                      className="px-3 py-1.5 rounded-lg bg-pink-600 hover:bg-pink-500 text-white text-xs font-righteous shadow-sm transition cursor-pointer"
-                      title="Set as Pro slot"
-                    >
-                      Pro
+                      LB #{activeLeaderboardIndex + 1}
                     </button>
                   </div>
                 </div>
